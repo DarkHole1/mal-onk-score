@@ -1,0 +1,1 @@
+data,mean,rank,popularity,num_list_users,num_scoring_users
