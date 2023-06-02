@@ -1,10 +1,61 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-        <title>Oshi no Ko rating statistics</title>
-    </head>
-    <body>
-        <a href="/oshi-no-ko.csv">Download data</a>
-    </body>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>Oshi no Ko rating statistics</title>
+</head>
+
+<body>
+    <div>
+        <canvas id="chart"></canvas>
+    </div>
+    <a href="/oshi-no-ko.csv">Download data</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script>
+        const ctx = document.getElementById('chart')
+        fetch('./oshi-no-ko.csv')
+            .then(data => data.text())
+            .then(data => {
+                let parsed = parseData(data)
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: 'Mean score',
+                            data: parsed.map(e => ({ x: e.date, y: e.mean })),
+                            pointStyle: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    displayFormats: {
+                                        quarter: 'MMM YYYY'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            })
+
+        function parseData(data) {
+            let res = []
+            const lines = data.split('\n')
+            const headers = lines[0].split(',')
+            for (const line of lines.slice(1)) {
+                const fields = line.split(',')
+                res.push(Object.fromEntries(fields.map((e, i) => [headers[i], i == 0 ? e : parseFloat(e)])))
+            }
+            return res
+        }
+    </script>
+</body>
+
 </html>
